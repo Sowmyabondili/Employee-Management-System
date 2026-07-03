@@ -9,14 +9,12 @@ __pycache__/
 *.py[cod]
 *.pyo
 
-# VS Code
-.vscode/
-
 # Static Files
 staticfiles/
 
-# Database
-db.sqlite3
+# VS Code
+.vscode/
 
-# macOS
+# OS Files
 .DS_Store
+Thumbs.db
