@@ -1,0 +1,172 @@
+{% extends 'employees/base.html' %}
+
+{% block title %}{{ action }} Employee{% endblock %}
+{% block page_title %}{{ action }} Employee{% endblock %}
+{% block breadcrumb %}
+  <a href="{% url 'employee_list' %}" style="color:inherit; opacity:0.7;">Employees</a> &rsaquo;
+  {% if action == 'Add' %}New Employee{% else %}Edit {{ employee.get_full_name }}{% endif %}
+{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center">
+  <div class="col-12 col-xl-10">
+
+    <div class="ems-card">
+      <div class="ems-card-header">
+        <h2 class="ems-card-title">
+          {% if action == 'Add' %}
+            <i class="bi bi-person-plus me-2" style="color:#818cf8;"></i>Add New Employee
+          {% else %}
+            <i class="bi bi-pencil-square me-2" style="color:#fbbf24;"></i>Update Employee
+          {% endif %}
+        </h2>
+        <a href="{% url 'employee_list' %}" class="btn-ems btn-ems-ghost btn-ems-sm" id="back-to-list">
+          <i class="bi bi-arrow-left"></i> Back
+        </a>
+      </div>
+
+      <div class="ems-card-body">
+        <form method="POST" enctype="multipart/form-data" id="employeeForm" novalidate>
+          {% csrf_token %}
+
+          <!-- ── PERSONAL INFORMATION ── -->
+          <div class="form-section-title">
+            <i class="bi bi-person-vcard me-2"></i>Personal Information
+          </div>
+
+          <div class="row g-3 mb-4">
+            <div class="col-md-6">
+              <label for="first_name" class="form-label">First Name <span style="color:#f87171;">*</span></label>
+              {{ form.first_name }}
+              {% if form.first_name.errors %}
+                <div style="color:#f87171; font-size:0.78rem; margin-top:0.35rem;">{{ form.first_name.errors.0 }}</div>
+              {% endif %}
+            </div>
+
+            <div class="col-md-6">
+              <label for="last_name" class="form-label">Last Name <span style="color:#f87171;">*</span></label>
+              {{ form.last_name }}
+              {% if form.last_name.errors %}
+                <div style="color:#f87171; font-size:0.78rem; margin-top:0.35rem;">{{ form.last_name.errors.0 }}</div>
+              {% endif %}
+            </div>
+
+            <div class="col-md-6">
+              <label for="email" class="form-label">Email Address <span style="color:#f87171;">*</span></label>
+              {{ form.email }}
+              {% if form.email.errors %}
+                <div style="color:#f87171; font-size:0.78rem; margin-top:0.35rem;">{{ form.email.errors.0 }}</div>
+              {% endif %}
+            </div>
+
+            <div class="col-md-6">
+              <label for="phone" class="form-label">Phone Number <span style="color:#f87171;">*</span></label>
+              {{ form.phone }}
+              {% if form.phone.errors %}
+                <div style="color:#f87171; font-size:0.78rem; margin-top:0.35rem;">{{ form.phone.errors.0 }}</div>
+              {% endif %}
+            </div>
+
+            <div class="col-12">
+              <label for="address" class="form-label">Address</label>
+              {{ form.address }}
+            </div>
+
+            <div class="col-md-6">
+              <label for="photo" class="form-label">Profile Photo</label>
+              {{ form.photo }}
+              {% if action == 'Update' and employee.photo %}
+                <div class="mt-2 d-flex align-items-center gap-2">
+                  <img src="{{ employee.photo.url }}" alt="Current photo" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid rgba(79,70,229,0.3);">
+                  <span style="font-size:0.75rem; color:#64748b;">Current photo</span>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- ── JOB INFORMATION ── -->
+          <div class="form-section-title">
+            <i class="bi bi-briefcase me-2"></i>Job Information
+          </div>
+
+          <div class="row g-3 mb-4">
+            <div class="col-md-6">
+              <label for="department" class="form-label">Department <span style="color:#f87171;">*</span></label>
+              {{ form.department }}
+              {% if form.department.errors %}
+                <div style="color:#f87171; font-size:0.78rem; margin-top:0.35rem;">{{ form.department.errors.0 }}</div>
+              {% endif %}
+            </div>
+
+            <div class="col-md-6">
+              <label for="designation" class="form-label">Designation / Job Title <span style="color:#f87171;">*</span></label>
+              {{ form.designation }}
+              {% if form.designation.errors %}
+                <div style="color:#f87171; font-size:0.78rem; margin-top:0.35rem;">{{ form.designation.errors.0 }}</div>
+              {% endif %}
+            </div>
+
+            <div class="col-md-4">
+              <label for="salary" class="form-label">Salary (₹) <span style="color:#f87171;">*</span></label>
+              {{ form.salary }}
+              {% if form.salary.errors %}
+                <div style="color:#f87171; font-size:0.78rem; margin-top:0.35rem;">{{ form.salary.errors.0 }}</div>
+              {% endif %}
+            </div>
+
+            <div class="col-md-4">
+              <label for="date_joined" class="form-label">Date Joined <span style="color:#f87171;">*</span></label>
+              {{ form.date_joined }}
+              {% if form.date_joined.errors %}
+                <div style="color:#f87171; font-size:0.78rem; margin-top:0.35rem;">{{ form.date_joined.errors.0 }}</div>
+              {% endif %}
+            </div>
+
+            <div class="col-md-4">
+              <label for="status" class="form-label">Status <span style="color:#f87171;">*</span></label>
+              {{ form.status }}
+              {% if form.status.errors %}
+                <div style="color:#f87171; font-size:0.78rem; margin-top:0.35rem;">{{ form.status.errors.0 }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Non-field errors -->
+          {% if form.non_field_errors %}
+          <div class="alert-ems alert-error-ems mb-3">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            {{ form.non_field_errors }}
+          </div>
+          {% endif %}
+
+          <!-- Action Buttons -->
+          <div class="d-flex gap-3 mt-2">
+            <button type="submit" id="submitEmployeeBtn" class="btn-ems btn-ems-primary btn-ems-lg">
+              {% if action == 'Add' %}
+                <i class="bi bi-person-plus"></i> Add Employee
+              {% else %}
+                <i class="bi bi-save2"></i> Save Changes
+              {% endif %}
+            </button>
+            <a href="{% url 'employee_list' %}" class="btn-ems btn-ems-ghost btn-ems-lg" id="cancel-form">
+              Cancel
+            </a>
+            {% if action == 'Update' %}
+              <a href="{% url 'employee_delete' employee.pk %}"
+                 class="btn-ems btn-ems-danger btn-ems-lg ms-auto"
+                 id="delete-from-edit"
+                 onclick="return confirm('Are you sure you want to delete {{ employee.get_full_name }}?')">
+                <i class="bi bi-trash"></i> Delete
+              </a>
+            {% endif %}
+          </div>
+
+        </form>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}

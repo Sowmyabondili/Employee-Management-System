@@ -1,0 +1,159 @@
+{% extends 'employees/base.html' %}
+
+{% block title %}{{ employee.get_full_name }}{% endblock %}
+{% block page_title %}Employee Details{% endblock %}
+{% block breadcrumb %}
+  <a href="{% url 'employee_list' %}" style="color:inherit; opacity:0.7;">Employees</a>
+  &rsaquo; {{ employee.get_full_name }}
+{% endblock %}
+
+{% block content %}
+
+<div class="row g-4">
+
+  <!-- ─── LEFT: Profile Card ─── -->
+  <div class="col-12 col-lg-4">
+    <div class="ems-card text-center" style="padding:2rem;">
+      <!-- Avatar -->
+      <div class="detail-avatar mx-auto mb-3">
+        {% if employee.photo %}
+          <img src="{{ employee.photo.url }}" alt="{{ employee.get_full_name }}">
+        {% else %}
+          {{ employee.first_name|first|upper }}{{ employee.last_name|first|upper }}
+        {% endif %}
+      </div>
+
+      <h2 style="font-size:1.25rem; font-weight:700; margin-bottom:0.25rem;">
+        {{ employee.get_full_name }}
+      </h2>
+      <p style="color:#94a3b8; font-size:0.85rem; margin-bottom:1rem;">
+        {{ employee.designation }}
+      </p>
+
+      <div class="d-flex justify-content-center gap-2 mb-3">
+        <span class="badge-status
+          {% if employee.status == 'Active' %}badge-active
+          {% elif employee.status == 'Inactive' %}badge-inactive
+          {% else %}badge-on-leave{% endif %}">
+          {{ employee.status }}
+        </span>
+        <span class="badge-dept">{{ employee.department }}</span>
+      </div>
+
+      <div class="d-flex gap-2 justify-content-center">
+        <a href="{% url 'employee_edit' employee.pk %}"
+           class="btn-ems btn-ems-primary btn-ems-sm" id="edit-from-detail">
+          <i class="bi bi-pencil"></i> Edit
+        </a>
+        <a href="{% url 'employee_delete' employee.pk %}"
+           class="btn-ems btn-ems-danger btn-ems-sm" id="delete-from-detail">
+          <i class="bi bi-trash"></i> Delete
+        </a>
+        <a href="{% url 'employee_list' %}"
+           class="btn-ems btn-ems-ghost btn-ems-sm" id="back-from-detail">
+          <i class="bi bi-arrow-left"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── RIGHT: Info Details ─── -->
+  <div class="col-12 col-lg-8">
+
+    <!-- Personal Info -->
+    <div class="ems-card mb-3">
+      <div class="ems-card-header">
+        <h3 class="ems-card-title"><i class="bi bi-person-vcard me-2" style="color:#818cf8;"></i>Personal Information</h3>
+      </div>
+      <div class="ems-card-body">
+        <div class="row g-0">
+          <div class="col-12 col-md-6">
+            <div class="detail-field" style="padding-right:1rem;">
+              <span class="detail-field-label">First Name</span>
+              <span class="detail-field-value">{{ employee.first_name }}</span>
+            </div>
+            <div class="detail-field" style="padding-right:1rem;">
+              <span class="detail-field-label">Last Name</span>
+              <span class="detail-field-value">{{ employee.last_name }}</span>
+            </div>
+            <div class="detail-field" style="padding-right:1rem;">
+              <span class="detail-field-label">Email</span>
+              <span class="detail-field-value" style="font-size:0.8rem;">
+                <a href="mailto:{{ employee.email }}" style="color:#818cf8;">{{ employee.email }}</a>
+              </span>
+            </div>
+          </div>
+          <div class="col-12 col-md-6">
+            <div class="detail-field" style="padding-left:1rem;">
+              <span class="detail-field-label">Phone</span>
+              <span class="detail-field-value">
+                <a href="tel:{{ employee.phone }}" style="color:#34d399;">{{ employee.phone }}</a>
+              </span>
+            </div>
+            <div class="detail-field" style="padding-left:1rem;">
+              <span class="detail-field-label">Employee ID</span>
+              <span class="detail-field-value" style="font-family:monospace; color:#818cf8;">
+                #EMP{{ employee.pk|stringformat:"04d" }}
+              </span>
+            </div>
+            <div class="detail-field" style="padding-left:1rem;">
+              <span class="detail-field-label">Address</span>
+              <span class="detail-field-value" style="font-size:0.8rem; max-width:180px; text-align:right;">
+                {{ employee.address|default:"—" }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Job Info -->
+    <div class="ems-card">
+      <div class="ems-card-header">
+        <h3 class="ems-card-title"><i class="bi bi-briefcase me-2" style="color:#fbbf24;"></i>Job Information</h3>
+      </div>
+      <div class="ems-card-body">
+        <div class="row g-0">
+          <div class="col-12 col-md-6">
+            <div class="detail-field" style="padding-right:1rem;">
+              <span class="detail-field-label">Department</span>
+              <span class="badge-dept">{{ employee.department }}</span>
+            </div>
+            <div class="detail-field" style="padding-right:1rem;">
+              <span class="detail-field-label">Designation</span>
+              <span class="detail-field-value">{{ employee.designation }}</span>
+            </div>
+            <div class="detail-field" style="padding-right:1rem;">
+              <span class="detail-field-label">Salary</span>
+              <span class="salary-text">₹{{ employee.salary|floatformat:2 }}</span>
+            </div>
+          </div>
+          <div class="col-12 col-md-6">
+            <div class="detail-field" style="padding-left:1rem;">
+              <span class="detail-field-label">Status</span>
+              <span class="badge-status
+                {% if employee.status == 'Active' %}badge-active
+                {% elif employee.status == 'Inactive' %}badge-inactive
+                {% else %}badge-on-leave{% endif %}">
+                {{ employee.status }}
+              </span>
+            </div>
+            <div class="detail-field" style="padding-left:1rem;">
+              <span class="detail-field-label">Date Joined</span>
+              <span class="detail-field-value">{{ employee.date_joined }}</span>
+            </div>
+            <div class="detail-field" style="padding-left:1rem;">
+              <span class="detail-field-label">Record Created</span>
+              <span class="detail-field-value" style="font-size:0.78rem; color:#64748b;">
+                {{ employee.created_at|date:"d M Y, H:i" }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}

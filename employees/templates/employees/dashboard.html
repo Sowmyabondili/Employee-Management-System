@@ -1,0 +1,248 @@
+{% extends 'employees/base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block breadcrumb %}Overview{% endblock %}
+
+{% block content %}
+
+<!-- ═══ STAT CARDS ═══ -->
+<div class="row g-3 mb-4">
+
+  <div class="col-6 col-xl-3">
+    <div class="stat-card stat-card-primary">
+      <div class="stat-icon stat-icon-primary">👥</div>
+      <div>
+        <div class="stat-value" id="stat-total">{{ total_employees }}</div>
+        <div class="stat-label">Total Employees</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-6 col-xl-3">
+    <div class="stat-card stat-card-success">
+      <div class="stat-icon stat-icon-success">✅</div>
+      <div>
+        <div class="stat-value" style="color:#34d399;">{{ active_employees }}</div>
+        <div class="stat-label">Active</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-6 col-xl-3">
+    <div class="stat-card stat-card-warning">
+      <div class="stat-icon stat-icon-warning">🏖️</div>
+      <div>
+        <div class="stat-value" style="color:#fbbf24;">{{ on_leave_employees }}</div>
+        <div class="stat-label">On Leave</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-6 col-xl-3">
+    <div class="stat-card stat-card-danger">
+      <div class="stat-icon stat-icon-danger">❌</div>
+      <div>
+        <div class="stat-value" style="color:#f87171;">{{ inactive_employees }}</div>
+        <div class="stat-label">Inactive</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══ CHARTS + DEPT BREAKDOWN ═══ -->
+<div class="row g-3 mb-4">
+
+  <!-- Dept Doughnut Chart -->
+  <div class="col-12 col-lg-5">
+    <div class="ems-card h-100">
+      <div class="ems-card-header">
+        <h2 class="ems-card-title">📊 Department Distribution</h2>
+      </div>
+      <div class="ems-card-body">
+        {% if total_employees > 0 %}
+        <div class="chart-wrapper">
+          <canvas id="deptChart"></canvas>
+        </div>
+        {% else %}
+        <div class="empty-state">
+          <div class="empty-state-icon">📊</div>
+          <div class="empty-state-title">No data yet</div>
+          <a href="{% url 'employee_add' %}" class="btn-ems btn-ems-primary btn-ems-sm mt-2">Add First Employee</a>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Dept Bar breakdown -->
+  <div class="col-12 col-lg-7">
+    <div class="ems-card h-100">
+      <div class="ems-card-header">
+        <h2 class="ems-card-title">🏢 By Department</h2>
+        <a href="{% url 'employee_list' %}" class="btn-ems btn-ems-ghost btn-ems-sm" id="view-all-dept">View All</a>
+      </div>
+      <div class="ems-card-body">
+        {% if dept_data %}
+          {% for dept in dept_data %}
+          <div class="dept-bar-row">
+            <div class="dept-bar-label">{{ dept.department }}</div>
+            <div class="dept-bar-track">
+              <div class="dept-bar-fill"
+                   style="width: {% if total_employees %}{{ dept.count|floatformat:0 }}{% else %}0{% endif %}%;
+                   background: {% cycle 'linear-gradient(135deg,#4f46e5,#818cf8)' 'linear-gradient(135deg,#06b6d4,#0891b2)' 'linear-gradient(135deg,#10b981,#059669)' 'linear-gradient(135deg,#f59e0b,#d97706)' 'linear-gradient(135deg,#ef4444,#dc2626)' 'linear-gradient(135deg,#8b5cf6,#6d28d9)' %}">
+              </div>
+            </div>
+            <div class="dept-bar-count">{{ dept.count }}</div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="empty-state">
+            <div class="empty-state-icon">🏢</div>
+            <div class="empty-state-title">No departments yet</div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══ SALARY SUMMARY + RECENT EMPLOYEES ═══ -->
+<div class="row g-3">
+
+  <!-- Salary Summary -->
+  <div class="col-12 col-lg-4">
+    <div class="ems-card h-100">
+      <div class="ems-card-header">
+        <h2 class="ems-card-title">💰 Salary Overview</h2>
+      </div>
+      <div class="ems-card-body">
+        <div class="detail-field">
+          <span class="detail-field-label">Total Payroll</span>
+          <span class="salary-text">₹{{ salary_stats.total|default:"0"|floatformat:2 }}</span>
+        </div>
+        <div class="detail-field">
+          <span class="detail-field-label">Average Salary</span>
+          <span class="salary-text">₹{{ salary_stats.average|default:"0"|floatformat:2 }}</span>
+        </div>
+        <div class="detail-field">
+          <span class="detail-field-label">Active Employees</span>
+          <span class="detail-field-value">{{ active_employees }}</span>
+        </div>
+        <div class="detail-field">
+          <span class="detail-field-label">Total Employees</span>
+          <span class="detail-field-value">{{ total_employees }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Employees -->
+  <div class="col-12 col-lg-8">
+    <div class="ems-card h-100">
+      <div class="ems-card-header">
+        <h2 class="ems-card-title">🕒 Recent Employees</h2>
+        <a href="{% url 'employee_list' %}" class="btn-ems btn-ems-ghost btn-ems-sm" id="view-all-recent">View All</a>
+      </div>
+      <div class="ems-card-body" style="padding-top:0.5rem; padding-bottom:0.5rem;">
+        {% if recent_employees %}
+          {% for emp in recent_employees %}
+          <div class="recent-emp-row">
+            <div class="emp-avatar">
+              {% if emp.photo %}
+                <img src="{{ emp.photo.url }}" alt="{{ emp.get_full_name }}">
+              {% else %}
+                {{ emp.first_name|first|upper }}{{ emp.last_name|first|upper }}
+              {% endif %}
+            </div>
+            <div class="recent-emp-info">
+              <div class="recent-emp-name">{{ emp.get_full_name }}</div>
+              <div class="recent-emp-dept">{{ emp.designation }} &bull; {{ emp.department }}</div>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              <span class="badge-status
+                {% if emp.status == 'Active' %}badge-active
+                {% elif emp.status == 'Inactive' %}badge-inactive
+                {% else %}badge-on-leave{% endif %}">
+                {{ emp.status }}
+              </span>
+              <a href="{% url 'employee_detail' emp.pk %}" class="btn-ems btn-ems-ghost btn-ems-sm" id="view-emp-{{ emp.pk }}">
+                <i class="bi bi-eye"></i>
+              </a>
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="empty-state" style="padding:2rem;">
+            <div class="empty-state-icon">👥</div>
+            <div class="empty-state-title">No employees yet</div>
+            <a href="{% url 'employee_add' %}" class="btn-ems btn-ems-primary btn-ems-sm mt-2" id="add-first-emp">
+              <i class="bi bi-plus-lg"></i> Add First Employee
+            </a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+{% if total_employees > 0 and dept_labels %}
+// Doughnut chart
+const ctx = document.getElementById('deptChart');
+if (ctx) {
+  new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: {{ dept_labels|safe }},
+      datasets: [{
+        data: {{ dept_counts|safe }},
+        backgroundColor: [
+          'rgba(79,70,229,0.85)',
+          'rgba(6,182,212,0.85)',
+          'rgba(16,185,129,0.85)',
+          'rgba(245,158,11,0.85)',
+          'rgba(239,68,68,0.85)',
+          'rgba(139,92,246,0.85)',
+          'rgba(236,72,153,0.85)',
+        ],
+        borderColor: '#1e293b',
+        borderWidth: 3,
+        hoverOffset: 8,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            color: '#94a3b8',
+            padding: 16,
+            font: { family: 'Inter', size: 11 },
+            boxWidth: 12,
+            boxHeight: 12,
+          }
+        },
+        tooltip: {
+          backgroundColor: '#1e293b',
+          borderColor: 'rgba(255,255,255,0.1)',
+          borderWidth: 1,
+          titleColor: '#e2e8f0',
+          bodyColor: '#94a3b8',
+        }
+      },
+      cutout: '68%',
+    }
+  });
+}
+{% endif %}
+</script>
+{% endblock %}

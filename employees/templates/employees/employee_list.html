@@ -1,0 +1,169 @@
+{% extends 'employees/base.html' %}
+
+{% block title %}Employees{% endblock %}
+{% block page_title %}Employees{% endblock %}
+{% block breadcrumb %}All Employees{% endblock %}
+
+{% block content %}
+
+<!-- ═══ SEARCH & FILTER BAR ═══ -->
+<div class="ems-card mb-4">
+  <div class="ems-card-body" style="padding:1.25rem 1.5rem;">
+    <form method="GET" id="searchForm">
+      <div class="row g-2 align-items-end">
+
+        <!-- Search Input -->
+        <div class="col-12 col-md-5">
+          <label class="form-label">🔍 Search Employees</label>
+          <div class="search-wrapper">
+            <i class="bi bi-search search-icon"></i>
+            {{ form.query }}
+          </div>
+        </div>
+
+        <!-- Department Filter -->
+        <div class="col-6 col-md-3">
+          <label class="form-label">Department</label>
+          {{ form.department }}
+        </div>
+
+        <!-- Status Filter -->
+        <div class="col-6 col-md-2">
+          <label class="form-label">Status</label>
+          {{ form.status }}
+        </div>
+
+        <!-- Buttons -->
+        <div class="col-12 col-md-2 d-flex gap-2">
+          <button type="submit" id="searchBtn" class="btn-ems btn-ems-primary flex-fill justify-content-center">
+            <i class="bi bi-search"></i> Search
+          </button>
+          <a href="{% url 'employee_list' %}" class="btn-ems btn-ems-ghost" id="clearSearch" title="Clear filters">
+            <i class="bi bi-x-lg"></i>
+          </a>
+        </div>
+
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ═══ EMPLOYEE TABLE ═══ -->
+<div class="ems-card">
+  <div class="ems-card-header">
+    <h2 class="ems-card-title">
+      👥 Employee Directory
+      <span style="font-size:0.75rem; font-weight:400; color:#64748b; margin-left:0.5rem;">
+        {{ total_results }} result{{ total_results|pluralize }}
+        {% if query %} for "<em>{{ query }}</em>"{% endif %}
+      </span>
+    </h2>
+    <a href="{% url 'employee_add' %}" class="btn-ems btn-ems-primary btn-ems-sm" id="add-employee-btn">
+      <i class="bi bi-plus-lg"></i> Add Employee
+    </a>
+  </div>
+
+  {% if employees %}
+  <div style="overflow-x:auto;">
+    <table class="ems-table" id="employeeTable">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Employee</th>
+          <th>Department</th>
+          <th>Designation</th>
+          <th>Phone</th>
+          <th>Salary</th>
+          <th>Status</th>
+          <th>Joined</th>
+          <th style="text-align:center;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for emp in employees %}
+        <tr id="emp-row-{{ emp.pk }}">
+          <td style="color:#475569; font-size:0.75rem; font-weight:600;">{{ forloop.counter }}</td>
+
+          <td>
+            <div class="emp-info-cell">
+              <div class="emp-avatar">
+                {% if emp.photo %}
+                  <img src="{{ emp.photo.url }}" alt="{{ emp.get_full_name }}">
+                {% else %}
+                  {{ emp.first_name|first|upper }}{{ emp.last_name|first|upper }}
+                {% endif %}
+              </div>
+              <div>
+                <div class="emp-name">{{ emp.get_full_name }}</div>
+                <div class="emp-email">{{ emp.email }}</div>
+              </div>
+            </div>
+          </td>
+
+          <td><span class="badge-dept">{{ emp.department }}</span></td>
+          <td style="color:#94a3b8;">{{ emp.designation }}</td>
+          <td style="color:#94a3b8;">{{ emp.phone }}</td>
+          <td class="salary-text">₹{{ emp.salary|floatformat:0 }}</td>
+
+          <td>
+            <span class="badge-status
+              {% if emp.status == 'Active' %}badge-active
+              {% elif emp.status == 'Inactive' %}badge-inactive
+              {% else %}badge-on-leave{% endif %}">
+              {{ emp.status }}
+            </span>
+          </td>
+
+          <td style="color:#64748b; font-size:0.8rem;">{{ emp.date_joined }}</td>
+
+          <td>
+            <div class="action-btns justify-content-center">
+              <a href="{% url 'employee_detail' emp.pk %}"
+                 class="btn-ems btn-ems-ghost btn-ems-sm"
+                 id="view-{{ emp.pk }}" title="View Details">
+                <i class="bi bi-eye"></i>
+              </a>
+              <a href="{% url 'employee_edit' emp.pk %}"
+                 class="btn-ems btn-ems-ghost btn-ems-sm"
+                 id="edit-{{ emp.pk }}" title="Edit"
+                 style="color:#fbbf24;">
+                <i class="bi bi-pencil"></i>
+              </a>
+              <a href="{% url 'employee_delete' emp.pk %}"
+                 class="btn-ems btn-ems-ghost btn-ems-sm"
+                 id="delete-{{ emp.pk }}" title="Delete"
+                 style="color:#f87171;">
+                <i class="bi bi-trash"></i>
+              </a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% else %}
+  <!-- Empty State -->
+  <div class="empty-state">
+    <div class="empty-state-icon">🔍</div>
+    <div class="empty-state-title">
+      {% if query %}No employees found for "{{ query }}"{% else %}No employees yet{% endif %}
+    </div>
+    <p style="font-size:0.85rem; color:#475569; margin-bottom:1rem;">
+      {% if query %}Try a different search term or clear filters.{% else %}Start by adding your first employee.{% endif %}
+    </p>
+    {% if query %}
+      <a href="{% url 'employee_list' %}" class="btn-ems btn-ems-ghost btn-ems-sm me-2" id="clear-search-empty">
+        <i class="bi bi-x"></i> Clear Search
+      </a>
+    {% endif %}
+    <a href="{% url 'employee_add' %}" class="btn-ems btn-ems-primary btn-ems-sm" id="add-from-empty">
+      <i class="bi bi-plus-lg"></i> Add Employee
+    </a>
+  </div>
+  {% endif %}
+
+</div>
+
+{% endblock %}
